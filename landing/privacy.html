@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>개인정보처리방침 - SkinMe</title>
+<meta name="description" content="SkinMe 개인정보처리방침 - 사진은 분석 후 즉시 삭제되며, 수집을 최소화합니다." />
+<style>
+  :root {
+    --bg: #ffffff; --card: #f8f9fa; --border: #e5e7eb;
+    --ink: #111111; --ink-2: #374151; --ink-3: #6b7280; --ink-4: #9ca3af; --mint: #10b981;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink-2); line-height: 1.7;
+    font-family: "Pretendard", "Pretendard Variable", -apple-system, BlinkMacSystemFont,
+      "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", Roboto, sans-serif;
+    font-size: 16px; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 680px; margin-inline: auto; padding: 56px 24px 96px; }
+  .back { color: var(--ink-3); text-decoration: none; font-size: 14px; }
+  .back:hover { color: var(--ink); }
+  h1 { color: var(--ink); font-size: clamp(26px, 6vw, 34px); font-weight: 800; letter-spacing: -0.01em; margin: 24px 0 6px; }
+  .effective { color: var(--ink-4); font-size: 14px; margin: 0 0 8px; }
+  .lead { color: var(--ink-2); margin: 0 0 8px; }
+  h2 { color: var(--ink); font-size: 18px; font-weight: 700; margin: 40px 0 12px; }
+  p { margin: 0 0 12px; }
+  ul { margin: 0 0 12px; padding-left: 20px; }
+  li { margin-bottom: 6px; }
+  .highlight { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--mint); border-radius: 12px; padding: 18px 20px; margin: 16px 0; color: var(--ink-2); }
+  .highlight b { color: var(--ink); }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 15px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--ink-4); font-weight: 700; font-size: 13px; letter-spacing: 0.03em; }
+  td { color: var(--ink-2); }
+  .ph { color: var(--mint); font-weight: 700; }
+  .note { color: var(--ink-4); font-size: 13px; }
+  a { color: var(--mint); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="index.html">← SkinMe</a>
+    <h1>개인정보처리방침</h1>
+    <p class="effective">시행일: <span class="ph">[YYYY-MM-DD]</span></p>
+    <p class="lead">SkinMe는 이용자의 개인정보를 중요하게 생각하며, 수집을 최소화합니다. 서비스는 광고·제품 판매·제3자 마케팅을 하지 않습니다.</p>
+
+    <div class="highlight">
+      촬영한 사진은 피부 분석을 위해 일시적으로만 사용되며, <b>분석이 끝나는 즉시 기기와 서버 양쪽에서 삭제</b>됩니다. 사진 원본은 어디에도 저장되지 않습니다. 저장되는 것은 분석으로 산출된 <b>수치 결과뿐</b>입니다.
+    </div>
+
+    <h2>1. 수집하는 정보</h2>
+    <table>
+      <thead><tr><th>항목</th><th>시점</th><th>보관</th></tr></thead>
+      <tbody>
+        <tr><td>셀카 사진</td><td>촬영 시</td><td>저장하지 않음 - 분석 직후 즉시 삭제</td></tr>
+        <tr><td>피부 분석 결과(점수 등)</td><td>분석 완료 시</td><td>익명 계정에 귀속되어 저장</td></tr>
+        <tr><td>등록한 제품명·측정 기록</td><td>이용자 입력 시</td><td>서버에 저장</td></tr>
+        <tr><td>익명 계정 식별자</td><td>최초 실행 시 자동 생성</td><td>서버에 저장(신원정보 없음)</td></tr>
+        <tr><td>구독·결제 상태</td><td>구독 시</td><td>결제 대행사를 통해 처리</td></tr>
+      </tbody>
+    </table>
+    <p class="note">이름·이메일·전화번호·성별·생년월일 등 신원 정보는 수집하지 않습니다. 온보딩에서의 선택은 기기 내에만 저장되며 서버로 전송되지 않습니다.</p>
+
+    <h2>2. 정보를 처리하는 위탁·제3자</h2>
+    <table>
+      <thead><tr><th>제공받는 자</th><th>목적</th><th>제공 정보</th></tr></thead>
+      <tbody>
+        <tr><td>Anthropic (Claude API)</td><td>사진의 피부 분석</td><td>분석용 이미지(분석 후 미보관)</td></tr>
+        <tr><td>Supabase</td><td>계정·분석 결과 저장</td><td>익명 계정 식별자, 분석 결과</td></tr>
+        <tr><td>RevenueCat / 스토어</td><td>구독 결제 처리</td><td>구매·구독 상태</td></tr>
+      </tbody>
+    </table>
+
+    <h2>3. 보유 기간 및 파기</h2>
+    <ul>
+      <li>사진: 분석 직후 즉시 파기(보유하지 않음)</li>
+      <li>분석 결과·제품 기록: 이용자가 삭제하거나 이용을 중단할 때까지</li>
+      <li>앱 내 <b>설정 &gt; 기록 전체 삭제</b> 또는 <b>계정·데이터 완전 삭제</b>로 언제든 삭제할 수 있습니다.</li>
+    </ul>
+
+    <h2>4. 이용자의 권리</h2>
+    <p>이용자는 자신의 데이터에 대해 열람·삭제를 요청할 수 있습니다. 앱 내 삭제 기능을 제공하며, 추가 요청은 아래 연락처로 문의해 주세요.</p>
+
+    <h2>5. 아동의 개인정보</h2>
+    <p>서비스는 만 14세 미만 아동을 대상으로 하지 않습니다.</p>
+
+    <h2>6. 문의처</h2>
+    <p>개인정보 관련 문의: <span class="ph">[실제 이메일 주소]</span></p>
+
+    <h2>7. 변경 고지</h2>
+    <p>본 방침이 변경될 경우 앱 또는 본 페이지를 통해 고지합니다.</p>
+
+    <p class="note" style="margin-top:32px;">※ 본 문서는 법률 자문이 아닙니다. 출시 전 검토를 권장하며, <span class="ph">[ ]</span> 항목은 실제 값으로 교체하세요.</p>
+  </div>
+</body>
+</html>

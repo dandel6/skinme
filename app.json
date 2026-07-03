@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "SkinMe",
+    "slug": "skinme",
+    "version": "1.0.0",
+    "scheme": "skinme",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.skinme.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "피부 측정을 위해 카메라를 사용해요. 사진은 분석 후 즉시 삭제됩니다"
+      }
+    },
+    "android": {
+      "package": "com.skinme.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#10B981",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.CAMERA"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "피부 측정을 위해 카메라를 사용해요. 사진은 분석 후 즉시 삭제됩니다",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "49c4bbd7-7b8a-4d07-bd8f-bbdb5e6f62b8"
+      }
+    }
+  }
+}

@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SkinMe - 거울은 매일 거짓말을 합니다</title>
+<meta name="description" content="셀카로 피부 점수를 재고, 지금 쓰는 화장품이 효과 있는지 14일 만에 숫자로 확인해요. 광고도, 제품 추천도 없이." />
+<meta property="og:title" content="SkinMe - 거울은 매일 거짓말을 합니다" />
+<meta property="og:description" content="같은 조건으로 재면 변화가 눈에 보여요. 14일 뒤, 화장품 효과를 숫자로." />
+<meta property="og:type" content="website" />
+<link rel="icon" type="image/png" href="favicon.png" />
+<!-- PLACEHOLDER: 배포 후 og 이미지 URL -->
+<meta property="og:image" content="PLACEHOLDER_OG_IMAGE_URL" />
+<style>
+  /* ── SkinMe 토큰 (앱 CLAUDE.md와 동일: 밝은 계측기 톤) · 라이트 단일 테마 의도 커밋 ── */
+  :root {
+    --bg: #ffffff; --card: #f8f9fa; --card-muted: #f3f4f6; --border: #e5e7eb;
+    --ink: #111111; --ink-2: #374151; --ink-3: #6b7280; --ink-4: #9ca3af;
+    --mint: #10b981; --mint-bright: #4ade80; --amber: #f59e0b;
+    --shadow: 0 1px 2px rgba(17,17,17,0.04), 0 10px 30px rgba(17,17,17,0.06);
+    --shadow-lift: 0 2px 4px rgba(17,17,17,0.05), 0 18px 48px rgba(16,185,129,0.12);
+    --maxw: 720px;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Pretendard","Pretendard Variable",-apple-system,BlinkMacSystemFont,
+      "Apple SD Gothic Neo","Malgun Gothic","Segoe UI",Roboto,sans-serif;
+    font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+    word-break: keep-all; overflow-wrap: break-word; /* 한국어: 단어 중간 안 자르고 어절 단위 줄바꿈 */
+  }
+  .num { font-variant-numeric: tabular-nums; }
+  .wrap { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: 24px; }
+  section { padding-block: clamp(76px, 13vw, 128px); }
+  .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mint); margin: 0 0 16px; }
+  h2 { font-size: clamp(23px, 5.2vw, 32px); font-weight: 700; line-height: 1.28; letter-spacing: -0.015em; margin: 0 0 18px; text-wrap: balance; }
+  p { margin: 0 0 14px; color: var(--ink-2); }
+  .muted { color: var(--ink-3); }
+  .fine { color: var(--ink-4); font-size: 13px; }
+
+  .cta {
+    display: inline-flex; align-items: center; gap: 8px; min-height: 54px; padding: 0 30px;
+    border-radius: 30px; background: var(--mint); color: #fff; font-weight: 700; font-size: 16px;
+    text-decoration: none; border: 0; cursor: pointer; box-shadow: 0 8px 22px rgba(16,185,129,0.32);
+    transition: transform .12s ease, background .12s ease, box-shadow .12s ease;
+  }
+  .cta:hover { transform: translateY(-2px); background: #0ea672; box-shadow: 0 12px 28px rgba(16,185,129,0.36); }
+  .cta:active { transform: translateY(0); }
+  .cta:focus-visible { outline: 3px solid var(--mint-bright); outline-offset: 3px; }
+  .stores { display: inline-flex; gap: 10px; flex-wrap: wrap; justify-content: center; align-items: center; }
+  .store-badge { display: inline-flex; align-items: center; position: relative; }
+  .store-badge img { height: 52px; width: auto; display: block; }
+  .store-badge:focus-visible { outline: 3px solid var(--mint-bright); outline-offset: 2px; border-radius: 8px; }
+  /* Google Play 웹 뱃지는 여백이 내장돼 있어 애플보다 작아 보임 → 살짝 키워 정렬 */
+  .store-badge.play img { height: 58px; }
+  .store-badge.soon { opacity: 0.5; cursor: default; }
+  .store-badge.soon .soon-tag { position: absolute; top: -7px; right: -4px; background: var(--ink); color: #fff;
+    font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; letter-spacing: 0.02em; }
+
+  /* ── 상단 헤더 (워드마크) ── */
+  .topbar { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,0.82); backdrop-filter: saturate(160%) blur(10px); -webkit-backdrop-filter: saturate(160%) blur(10px); border-bottom: 1px solid var(--hairline); }
+  .topbar .wrap { display: flex; align-items: center; justify-content: space-between; padding-block: 14px; }
+  .logo { height: 24px; width: auto; display: block; }
+  .topbar .mini-cta { font-size: 14px; font-weight: 700; color: var(--mint); text-decoration: none; }
+  .topbar .mini-cta:hover { color: #0ea672; }
+
+  /* ── 히어로 ── */
+  .hero { position: relative; overflow: hidden; text-align: center; padding-block: clamp(76px,14vw,132px); }
+  .hero::before { /* 민트 글로우 */
+    content: ""; position: absolute; left: 50%; top: 34%; width: 620px; height: 620px; transform: translate(-50%,-50%);
+    background: radial-gradient(circle, rgba(16,185,129,0.10), rgba(16,185,129,0) 62%); z-index: 0; pointer-events: none;
+  }
+  .hero-grid { position: absolute; inset: 0; display: grid; place-items: center; z-index: 0; pointer-events: none; }
+  .hero-grid svg { width: min(128vw, 960px); height: auto; transform-origin: center; animation: breathe 7s ease-in-out infinite; }
+  @keyframes breathe { 0%,100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.035); opacity: 1; } }
+  .scanline { position: absolute; left: 0; right: 0; top: 0; height: 2px; z-index: 0; pointer-events: none;
+    background: linear-gradient(90deg, transparent, var(--mint-bright), transparent); opacity: 0; }
+  .scanline.run { animation: sweep 2.2s cubic-bezier(.4,0,.2,1) .3s 1 forwards; }
+  @keyframes sweep { 0% { top: 6%; opacity: 0; } 12% { opacity: .9; } 88% { opacity: .9; } 100% { top: 94%; opacity: 0; } }
+  .hero .wrap { position: relative; z-index: 1; }
+  .hero h1 { font-size: clamp(36px, 9.5vw, 60px); font-weight: 800; line-height: 1.12; letter-spacing: -0.025em; margin: 0 0 22px; text-wrap: balance; }
+  .hero .lede { font-size: clamp(16px, 3.8vw, 19px); color: var(--ink-3); max-width: 26ch; margin: 0 auto 34px; }
+  .hero .cta { margin-bottom: 14px; }
+
+  /* ── 재현성 증명 ── */
+  .proof-cards { display: flex; gap: 14px; justify-content: center; align-items: stretch; margin: 8px 0 22px; flex-wrap: wrap; }
+  .measure { flex: 1 1 200px; max-width: 250px; background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 24px; box-shadow: var(--shadow); text-align: center; position: relative; }
+  .measure .label { font-size: 11px; letter-spacing: 0.1em; color: var(--ink-4); text-transform: uppercase; font-weight: 700; }
+  .measure .score { font-size: clamp(58px, 15vw, 80px); font-weight: 800; line-height: 1; margin: 10px 0 6px; letter-spacing: -0.03em; }
+  .measure .when { font-size: 13px; color: var(--ink-3); }
+  .equals { align-self: center; font-size: 30px; color: var(--mint); font-weight: 800; }
+  .proof-note { text-align: center; }
+  .proof-note .zero { color: var(--mint); font-weight: 800; }
+
+  /* ── 작동 3스텝 ── */
+  .steps { display: grid; gap: 16px; grid-template-columns: 1fr; }
+  @media (min-width: 620px) { .steps { grid-template-columns: repeat(3, 1fr); } }
+  .step { background: var(--bg); border: 1px solid var(--border); border-radius: 18px; padding: 26px; box-shadow: var(--shadow); }
+  .step .ico { height: 44px; margin-bottom: 16px; color: var(--mint); }
+  .step h3 { font-size: 15px; font-weight: 700; margin: 0 0 6px; }
+  .step p { font-size: 14px; margin: 0; color: var(--ink-3); }
+
+  /* ── 리포트 미리보기 ── */
+  .report { background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 30px; box-shadow: var(--shadow-lift); max-width: 380px; margin: 28px auto 0; }
+  .report .product { font-size: 14px; color: var(--ink-3); font-weight: 600; }
+  .report .verdict { font-size: 42px; font-weight: 800; color: var(--mint); margin: 6px 0 2px; letter-spacing: -0.02em; }
+  .report .verdict small { font-size: 21px; color: var(--ink-2); font-weight: 700; }
+  .report .rows { margin-top: 18px; display: grid; gap: 11px; }
+  .report .row { display: flex; justify-content: space-between; align-items: center; }
+  .report .row .m { color: var(--ink-2); font-size: 15px; }
+  .report .row .v { font-weight: 700; color: var(--ink); font-size: 16px; }
+  .report .row .v .up { color: var(--mint); }
+  .report .period { margin-top: 18px; padding-top: 15px; border-top: 1px solid var(--border); font-size: 12px; color: var(--ink-4); }
+
+  /* ── 중립성 ── */
+  .pillars { display: grid; gap: 12px; grid-template-columns: 1fr; margin-top: 8px; }
+  @media (min-width: 620px) { .pillars { grid-template-columns: repeat(3, 1fr); } }
+  .pillar { border: 1px solid var(--border); border-radius: 16px; padding: 20px; background: var(--card); }
+  .pillar b { display: block; color: var(--ink); font-size: 15px; margin-bottom: 4px; }
+  .pillar span { color: var(--ink-3); font-size: 13.5px; }
+  .privacy-line { margin-top: 22px; color: var(--ink-2); font-weight: 600; font-size: 16px; }
+  .privacy-line em { color: var(--mint); font-style: normal; }
+
+  /* ── 가격 ── */
+  .plans { display: grid; gap: 16px; grid-template-columns: 1fr; margin-top: 8px; }
+  @media (min-width: 560px) { .plans { grid-template-columns: 1fr 1fr; } }
+  .plan { border: 1px solid var(--border); border-radius: 18px; padding: 26px; background: var(--bg); }
+  .plan.pro { border-color: var(--mint); box-shadow: var(--shadow-lift); }
+  .plan .tier { font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-4); }
+  .plan.pro .tier { color: var(--mint); }
+  .plan .price { font-size: 26px; font-weight: 800; margin: 8px 0 2px; letter-spacing: -0.01em; }
+  .plan .price small { font-size: 14px; color: var(--ink-3); font-weight: 600; }
+  .plan ul { margin: 16px 0 0; padding: 0; list-style: none; display: grid; gap: 9px; }
+  .plan li { color: var(--ink-2); font-size: 14px; padding-left: 20px; position: relative; }
+  .plan li::before { content: ""; position: absolute; left: 2px; top: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--mint); }
+  .plan.free li::before { background: var(--ink-4); }
+  .price-fine { margin-top: 18px; text-align: center; }
+
+  .final { text-align: center; background: var(--card); }
+  .final h2 { font-size: clamp(25px, 6.2vw, 36px); }
+
+  footer { border-top: 1px solid var(--border); padding-block: 40px; }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; justify-content: space-between; }
+  footer a { color: var(--ink-3); text-decoration: none; font-size: 14px; }
+  footer a:hover { color: var(--ink); }
+  footer .copy { color: var(--ink-4); font-size: 13px; }
+
+  .reveal { opacity: 0; transform: translateY(14px); transition: opacity .6s ease, transform .6s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .hero-grid svg { animation: none; }
+    .scanline { display: none; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- 상단 헤더 -->
+  <header class="topbar">
+    <div class="wrap">
+      <img class="logo" src="skinme-wordmark.png" alt="SkinMe" />
+    </div>
+  </header>
+
+  <!-- ① 히어로 -->
+  <section class="hero">
+    <div class="scanline" id="scan" aria-hidden="true"></div>
+    <div class="hero-grid" aria-hidden="true">
+      <svg viewBox="-250 -250 500 500" fill="none" stroke="#10b981">
+        <circle r="60" stroke-opacity="0.12" /><circle r="110" stroke-opacity="0.09" />
+        <circle r="160" stroke-opacity="0.07" /><circle r="210" stroke-opacity="0.05" />
+        <line x1="-250" y1="0" x2="250" y2="0" stroke-opacity="0.05" />
+        <line x1="0" y1="-250" x2="0" y2="250" stroke-opacity="0.05" />
+      </svg>
+    </div>
+    <div class="wrap">
+      <h1>거울은 매일<br />거짓말을 합니다</h1>
+      <p class="lede">조명도 기분도 매일 다르니까요.<br />같은 조건으로 재야 변화가 눈에 보여요.</p>
+      <div class="stores">
+        <a class="store-badge play" href="https://play.google.com/store/apps/details?id=com.skinme.app" aria-label="Google Play에서 다운로드">
+          <img src="GetItOnGooglePlay_Badge_Web_color_Korean.svg" alt="Google Play에서 다운로드" />
+        </a>
+        <div class="store-badge soon" aria-label="App Store 곧 출시">
+          <img src="Download_on_the_App_Store_Badge_KR_RGB_blk_100317.svg" alt="App Store" />
+          <span class="soon-tag">곧 출시</span>
+        </div>
+      </div>
+      <p class="fine">안드로이드에서 지금 · iOS는 준비 중이에요</p>
+    </div>
+  </section>
+
+  <!-- ② 재현성 증명 -->
+  <section>
+    <div class="wrap">
+      <p class="eyebrow reveal">믿어도 되는 이유</p>
+      <h2 class="reveal">매번 같은 조건으로 찍으면,<br />점수 변화가 곧 피부 변화예요</h2>
+      <div class="proof-cards reveal">
+        <div class="measure">
+          <div class="label">1회차</div>
+          <div class="score num countup" data-to="78">0</div>
+          <div class="when">오늘 09:14</div>
+        </div>
+        <div class="equals" aria-hidden="true">=</div>
+        <div class="measure">
+          <div class="label">2회차</div>
+          <div class="score num countup" data-to="78">0</div>
+          <div class="when">오늘 09:15</div>
+        </div>
+      </div>
+      <p class="proof-note muted reveal">
+        같은 조건으로 두 번 재도 오차 <span class="zero num">0</span>이에요.
+        타원 가이드랑 화면 플래시로 촬영 조건을 딱 고정하거든요.
+      </p>
+    </div>
+  </section>
+
+  <!-- ③ 작동 방식 -->
+  <section style="background: var(--card);">
+    <div class="wrap">
+      <p class="eyebrow reveal">이렇게 돼요</p>
+      <h2 class="reveal">찍으면 숫자가, 14일 뒤엔 답이</h2>
+      <div class="steps">
+        <div class="step reveal">
+          <svg class="ico" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <ellipse cx="24" cy="24" rx="13" ry="17" stroke-dasharray="4 3" />
+          </svg>
+          <h3>1. 찍고</h3>
+          <p>타원 가이드에 얼굴 맞추고 한 장. 조명은 화면 플래시가 잡아줘요.</p>
+        </div>
+        <div class="step reveal">
+          <svg class="ico" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+            <text x="24" y="33" text-anchor="middle" font-size="27" font-weight="800" fill="currentColor">78</text>
+          </svg>
+          <h3>2. 점수 보고</h3>
+          <p>모공·트러블·톤을 5점 단위로. 종합이랑 항목별 점수는 무료예요.</p>
+        </div>
+        <div class="step reveal">
+          <svg class="ico" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <polyline points="6,34 18,26 28,30 42,14" /><circle cx="42" cy="14" r="2.5" fill="currentColor" />
+          </svg>
+          <h3>3. 답 받고</h3>
+          <p>쓰는 제품을 등록해두면, 14일 뒤에 효과가 있었는지 숫자로 알려줘요.</p>
+        </div>
+      </div>
+
+      <div class="report reveal" aria-label="14일 리포트 미리보기">
+        <div class="product">○○ 세라마이드 로션</div>
+        <div class="verdict num">개선 <small>+7</small></div>
+        <div class="rows">
+          <div class="row"><span class="m">모공</span><span class="v num">60 → <span class="up">70</span></span></div>
+          <div class="row"><span class="m">피부결</span><span class="v num">65 → <span class="up">70</span></span></div>
+          <div class="row"><span class="m">트러블</span><span class="v num">55 → <span class="up">65</span></span></div>
+        </div>
+        <div class="period num">6월 20일 → 7월 4일 · 2주 추적</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14일 이유 -->
+  <section>
+    <div class="wrap" style="text-align: center;">
+      <p class="eyebrow reveal">왜 14일이냐면</p>
+      <p class="reveal" style="font-size: clamp(20px, 4.4vw, 27px); font-weight: 700; color: var(--ink); line-height: 1.45; letter-spacing: -0.01em; max-width: 30ch; margin: 0 auto; text-wrap: balance;">
+        피부가 한 번 새로 돌아오는 시간, <span style="color: var(--mint);">2주</span>. 그때가 돼야 효과가 눈에 보여요.
+      </p>
+      <p class="muted reveal" style="margin-top: 14px; font-size: 14px;">그 전에 "효과 있다"는 건 아직 이른 얘기예요.</p>
+    </div>
+  </section>
+
+  <!-- ④ 중립성 -->
+  <section style="background: var(--card);">
+    <div class="wrap">
+      <p class="eyebrow reveal">우리가 안 하는 것</p>
+      <h2 class="reveal">팔 게 없어서, 점수가 정직해요</h2>
+      <div class="pillars reveal">
+        <div class="pillar"><b>광고가 없어요</b><span>화면 어디에도 배너를 안 넣어요</span></div>
+        <div class="pillar"><b>추천이 없어요</b><span>뭘 사라고 권하지 않아요</span></div>
+        <div class="pillar"><b>판매가 없어요</b><span>측정 기록을 팔지 않아요</span></div>
+      </div>
+      <p class="privacy-line reveal">사진은 분석하고 <em>바로 지워요</em>. 남는 건 숫자뿐이에요.</p>
+    </div>
+  </section>
+
+  <!-- ⑤ 가격 -->
+  <section>
+    <div class="wrap">
+      <p class="eyebrow reveal">가격</p>
+      <h2 class="reveal">숫자는 공짜, 답은 Pro예요</h2>
+      <div class="plans">
+        <div class="plan free reveal">
+          <div class="tier">무료</div>
+          <div class="price">0원</div>
+          <ul>
+            <li>하루 한 번 측정</li>
+            <li>종합 · 항목별 점수</li>
+            <li>측정 기록</li>
+            <li>오늘 점수 공유</li>
+          </ul>
+        </div>
+        <div class="plan pro reveal">
+          <div class="tier">Pro</div>
+          <div class="price num">월 4,900원 <small>· 연 39,000원</small></div>
+          <ul>
+            <li>측정 무제한</li>
+            <li>항목별 이유랑 개선 방법</li>
+            <li>추이 그래프</li>
+            <li>14일 효과 리포트</li>
+          </ul>
+        </div>
+      </div>
+      <p class="price-fine fine reveal">한 달 무료로 써보고 이어서 자동 갱신 · 아무 때나 해지돼요 · 연 39,000원이면 한 달 3,250원꼴</p>
+    </div>
+  </section>
+
+  <!-- ⑥ 마지막 CTA -->
+  <section class="final">
+    <div class="wrap">
+      <h2 class="reveal">오늘 피부부터, 숫자로</h2>
+      <p class="muted reveal">거울은 그만 믿고, 매번 같은 숫자로 확인해요.</p>
+      <div class="stores" style="margin-top: 26px;">
+        <a class="store-badge play" href="https://play.google.com/store/apps/details?id=com.skinme.app" aria-label="Google Play에서 다운로드">
+          <img src="GetItOnGooglePlay_Badge_Web_color_Korean.svg" alt="Google Play에서 다운로드" />
+        </a>
+        <div class="store-badge soon" aria-label="App Store 곧 출시">
+          <img src="Download_on_the_App_Store_Badge_KR_RGB_blk_100317.svg" alt="App Store" />
+          <span class="soon-tag">곧 출시</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <a href="privacy.html">개인정보처리방침</a>
+      <!-- PLACEHOLDER: 실제 문의 이메일 -->
+      <a href="mailto:PLACEHOLDER_CONTACT_EMAIL">문의</a>
+      <span class="copy">© 2026 SkinMe</span>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      // 히어로 스캔 라인 1회 스윕
+      if (!reduce) {
+        var scan = document.getElementById("scan");
+        if (scan) requestAnimationFrame(function () { scan.classList.add("run"); });
+      }
+
+      // 숫자 카운트업 (0 → data-to), 스크롤 진입 시 1회
+      function countUp(el) {
+        var to = parseInt(el.getAttribute("data-to"), 10) || 0;
+        if (reduce) { el.textContent = to; return; }
+        var dur = 900, start = null;
+        function tick(t) {
+          if (start === null) start = t;
+          var p = Math.min((t - start) / dur, 1);
+          var eased = 1 - Math.pow(1 - p, 3);
+          el.textContent = Math.round(to * eased);
+          if (p < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      }
+
+      var reveals = document.querySelectorAll(".reveal");
+      var counts = document.querySelectorAll(".countup");
+      if (reduce || !("IntersectionObserver" in window)) {
+        reveals.forEach(function (el) { el.classList.add("in"); });
+        counts.forEach(function (el) { el.textContent = el.getAttribute("data-to"); });
+        return;
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          if (e.target.classList.contains("reveal")) e.target.classList.add("in");
+          if (e.target.classList.contains("countup")) countUp(e.target);
+          io.unobserve(e.target);
+        });
+      }, { threshold: 0.2 });
+      reveals.forEach(function (el) { io.observe(el); });
+      counts.forEach(function (el) { io.observe(el); });
+    })();
+  </script>
+</body>
+</html>
