@@ -13,7 +13,7 @@ A mobile app that measures your skin from a single selfie, then tells you 14 day
   <img src="https://img.shields.io/badge/Claude-Vision%20API-D97757?logo=anthropic&logoColor=white" />
 </p>
 
-<p align="center"><a href="README.kr.md">한국어</a> | English</p>
+<p align="center"><a href="docs/ko/README.md">한국어</a> | English</p>
 
 ---
 

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/brand/skinme-wordmark.png" alt="SkinMe" width="280" />
+  <img src="../../assets/brand/skinme-wordmark.png" alt="SkinMe" width="280" />
 </p>
 
 <p align="center"><b>거울은 매일 거짓말을 합니다.</b><br/>
@@ -13,7 +13,7 @@
   <img src="https://img.shields.io/badge/Claude-Vision%20API-D97757?logo=anthropic&logoColor=white" />
 </p>
 
-<p align="center">한국어 | <a href="README.md">English</a></p>
+<p align="center">한국어 | <a href="../../README.md">English</a></p>
 
 ---
 
