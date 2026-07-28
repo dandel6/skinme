@@ -2,8 +2,8 @@
   <img src="assets/brand/skinme-wordmark.png" alt="SkinMe" width="280" />
 </p>
 
-<p align="center"><b>거울은 매일 거짓말을 합니다.</b><br/>
-셀카 한 장으로 피부를 계측하고, 14일 뒤 화장품이 실제로 효과가 있었는지 판정하는 모바일 앱</p>
+<p align="center"><b>Your mirror lies to you every day.</b><br/>
+A mobile app that measures your skin from a single selfie, then tells you 14 days later whether your skincare product actually worked</p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Expo-SDK%2054-000020?logo=expo&logoColor=white" />
@@ -13,126 +13,126 @@
   <img src="https://img.shields.io/badge/Claude-Vision%20API-D97757?logo=anthropic&logoColor=white" />
 </p>
 
-<p align="center">한국어 | <a href="README.en.md">English</a></p>
+<p align="center"><a href="README.kr.md">한국어</a> | English</p>
 
 ---
 
-## 무엇을 하는 앱인가
+## What it does
 
-화장품을 쓰면서 "이게 진짜 효과가 있나?" 싶어도 답해주는 사람은 없습니다. SkinMe는 그 질문에 숫자로 답합니다.
+You keep using skincare products, but nobody answers the question "is this actually working?" SkinMe answers it with numbers.
 
-- **오늘 탭**
-  - 셀카를 찍으면 AI가 6개 지표(모공·피부결·트러블·유수분·붉은기·톤/색소)를 점수화합니다.
-- **리포트 탭**
-  - 화장품을 등록하면 14일 뒤 시작 시점 대비 개선 / 변화 없음 / 악화를 판정합니다.
-  - 14일은 피부 턴오버 주기의 생물학적 하한이어서 바꾸지 않는 값입니다.
-- **광고·제품 판매 완전 배제**
-  - 중립적인 판정이 곧 이 제품의 존재 이유입니다.
+- **Today tab**
+  - Take a selfie and the AI scores 6 metrics: pores, texture, blemishes, oil/moisture balance, redness, and tone/pigmentation.
+- **Report tab**
+  - Register a product and 14 days later you get a verdict: improved, no change, or worse, compared to your starting point.
+  - 14 days is the biological lower bound of the skin turnover cycle, so it stays fixed.
+- **No ads, no product sales**
+  - A neutral verdict is the whole reason this product exists.
 
-## 숫자를 믿게 만드는 설계
+## Making the numbers trustworthy
 
-측정 앱의 생명은 재현성입니다. 같은 순간을 두 번 재면 같은 숫자가 나와야 합니다. 이 프로젝트는 전 지표 재현 오차 0을 실측으로 확인한 뒤에야 다음 단계로 넘어갔습니다.
+A measurement app lives or dies by reproducibility. Measuring the same moment twice must produce the same number. This project moved forward only after confirming zero deviation across all metrics in real-device tests.
 
-**입력 통제 (촬영 파이프라인)**
-- 타원 가이드 오버레이 + 좌표 단일 소스(`constants/faceGuide.ts`)
-- 조도 게이트: 극단적 암흑 차단 → 화면 백색 플래시로 조명 보정
-- 한 셔터에 연사 2컷, 촬영 후 중앙 60% 휘도 판정. 미달 시 폐기·재촬영 유도
-- 타원 바운딩 크롭(+10% 패딩) 후 원본 즉시 삭제
+**Input control (capture pipeline)**
+- Oval guide overlay with a single source of truth for coordinates (`constants/faceGuide.ts`)
+- Illuminance gate: blocks extreme darkness, then compensates lighting with a white screen flash
+- 2-shot burst per shutter press, followed by a center-60% luminance check. Failing shots are discarded and the user is asked to retake
+- Oval bounding crop (+10% padding), original photo deleted immediately
 
-**출력 통제 (분석 파이프라인)**
-- Claude Vision 호출은 `temperature 0` 고정
-- 모든 점수는 5점 밴드(5의 배수). 프롬프트가 지시하고 서버측 `quantize5`가 강제합니다 (프롬프트는 지시, 코드는 강제)
-- 지표 이원화: 구조 지표(모공·피부결·트러블)는 항상 점수화, 색 지표(붉은기·톤·색소)는 조명이 양호할 때만. 아니면 숨기지 않고 "측정 보류 + 사유"를 명시
-- 프롬프트는 `prompts/skin-analysis-v0.3 → v0.10`으로 버전 관리, `sync-prompt` 스크립트가 로컬 원본·생성 파일·배포본 sha를 3중 검증
+**Output control (analysis pipeline)**
+- Claude Vision calls pinned to `temperature 0`
+- Every score snaps to 5-point bands (multiples of 5). The prompt instructs it and server-side `quantize5` enforces it (prompts instruct, code enforces)
+- Two-tier metrics: structural metrics (pores, texture, blemishes) are always scored, color metrics (redness, tone, pigmentation) only under good lighting. Otherwise the app shows "measurement held" with the reason instead of hiding it
+- Prompts are versioned as `prompts/skin-analysis-v0.3 → v0.10`, and the `sync-prompt` script triple-checks the sha across local source, generated file, and deployed build
 
-**서버 방어**
-- Supabase RLS: 모든 테이블에 본인 행 select/insert/update/delete 정책
-- 무료 사용량 캡 서버측 강제 (클라이언트 검사는 UX 방어선일 뿐)
-- 카나리 cron(`canary-skin`)으로 분석 파이프라인 상시 모니터링
-- 익명 인증 → 결제 시 RevenueCat webhook으로 entitlement 동기화
+**Server-side defense**
+- Supabase RLS: own-row select/insert/update/delete policies on every table
+- Free-tier usage cap enforced server-side (client checks are just a UX guard)
+- Canary cron (`canary-skin`) continuously monitors the analysis pipeline
+- Anonymous auth, with entitlements synced through the RevenueCat webhook on purchase
 
-**프라이버시**
-- 사진은 서버에 저장하지 않습니다. 분석 후 즉시 폐기하고 결과 JSON만 저장합니다.
-- 로그에 base64 출력 금지, 폐기 사진도 파일 삭제까지 확인
+**Privacy**
+- Photos are never stored on the server. They are discarded right after analysis and only the result JSON is saved
+- No base64 in logs, and discarded photos are verified deleted at the file level
 
-## 아키텍처
+## Architecture
 
 ```mermaid
 flowchart LR
     subgraph App["📱 Expo App (React Native + TS)"]
-        C[촬영 파이프라인<br/>조도 게이트 · 크롭 · 휘도 검증] --> A[분석 요청]
-        A --> T[오늘 탭<br/>점수 · 추이]
-        A --> V[리포트 탭<br/>14일 효능 판정]
+        C[Capture pipeline<br/>illuminance gate · crop · luminance check] --> A[Analysis request]
+        A --> T[Today tab<br/>scores · trends]
+        A --> V[Report tab<br/>14-day verdict]
     end
     subgraph SB["Supabase"]
-        EF[Edge Function<br/>analyze-skin] --> PG[(Postgres + RLS<br/>결과 JSON만 저장)]
+        EF[Edge Function<br/>analyze-skin] --> PG[(Postgres + RLS<br/>result JSON only)]
         CA[canary-skin cron] -.-> EF
         RC[rc-webhook] --> ENT[(entitlements)]
     end
-    A -->|"이미지 (즉시 폐기)"| EF
+    A -->|"image (discarded immediately)"| EF
     EF -->|"temperature 0"| CL[Claude Vision API]
-    CL -->|"JSON → quantize5 정규화"| EF
+    CL -->|"JSON → quantize5 normalization"| EF
     RVC[RevenueCat] --> RC
 ```
 
-## 스택
+## Stack
 
-| 영역 | 기술 |
+| Area | Tech |
 |---|---|
-| 앱 | Expo SDK 54 · React Native 0.81 · TypeScript (strict) · expo-router |
-| 촬영/센서 | expo-camera · expo-brightness · expo-sensors · expo-image-manipulator |
-| 백엔드 | Supabase (익명 Auth · Postgres/RLS · Edge Functions) |
-| AI 분석 | Anthropic Claude (vision, temperature 0) · 프롬프트 버전 관리 |
-| 결제 | RevenueCat (구독 · webhook entitlement 동기화) |
-| 빌드/배포 | EAS Build · `supabase functions deploy --use-api` |
+| App | Expo SDK 54 · React Native 0.81 · TypeScript (strict) · expo-router |
+| Capture/Sensors | expo-camera · expo-brightness · expo-sensors · expo-image-manipulator |
+| Backend | Supabase (anonymous Auth · Postgres/RLS · Edge Functions) |
+| AI Analysis | Anthropic Claude (vision, temperature 0) · versioned prompts |
+| Payments | RevenueCat (subscriptions · webhook entitlement sync) |
+| Build/Deploy | EAS Build · `supabase functions deploy --use-api` |
 
-## 프로젝트 구조
+## Project structure
 
 ```
-app/                    # expo-router 화면
-  (tabs)/today.tsx      #   오늘 탭: 스냅샷·점수·추이
-  (tabs)/verdict.tsx    #   리포트 탭: 제품 등록·14일 판정
-  capture.tsx           #   촬영 플로우
-  paywall.tsx           #   페이월
+app/                    # expo-router screens
+  (tabs)/today.tsx      #   Today tab: snapshot, scores, trends
+  (tabs)/verdict.tsx    #   Report tab: product registration, 14-day verdict
+  capture.tsx           #   capture flow
+  paywall.tsx           #   paywall
 components/             # capture / today / verdict / paywall / dev
 lib/
-  analysis/             # 분석 요청·스키마 (zod)
-  verdict/              # 판정 로직 (기준선·변화 계산)
-  purchases/            # RevenueCat 연동
+  analysis/             # analysis request & schema (zod)
+  verdict/              # verdict logic (baseline & change calculation)
+  purchases/            # RevenueCat integration
   faceCrop.ts luminance.ts photoQuality.ts ...
-constants/              # strings.ts · faceGuide.ts (좌표 단일 소스)
+constants/              # strings.ts · faceGuide.ts (single source for coordinates)
 supabase/
   functions/            # analyze-skin · canary-skin · rc-webhook · delete-account
-  migrations/           # RLS 정책·rate limit·entitlements 등 20+ 마이그레이션
-prompts/                # 분석 프롬프트 v0.3 → v0.10 (버전 관리)
-scripts/sync-prompt.mjs # 프롬프트 원본↔생성물↔배포 sha 3중 검증
-docs/                   # 감사 문서·보안 리뷰·테스트 체크리스트
-landing/                # 랜딩 페이지·개인정보처리방침
+  migrations/           # 20+ migrations: RLS policies, rate limit, entitlements
+prompts/                # analysis prompts v0.3 → v0.10 (versioned)
+scripts/sync-prompt.mjs # triple sha check: source ↔ generated ↔ deployed
+docs/                   # audit docs, security reviews, test checklists
+landing/                # landing page, privacy policy
 ```
 
-## 실행하기
+## Getting started
 
 ```bash
 npm install
-cp .env.example .env    # Supabase URL·anon key, RevenueCat key 입력
+cp .env.example .env    # fill in Supabase URL/anon key and RevenueCat key
 npx expo start
 ```
 
-백엔드는 Supabase 프로젝트에 `supabase/migrations`를 적용한 뒤 edge function을 배포하면 됩니다:
+For the backend, apply `supabase/migrations` to your Supabase project and deploy the edge functions:
 
 ```bash
 supabase db push
-npm run sync-prompt          # 프롬프트 → prompt.gen.ts 생성·sha 검증
+npm run sync-prompt          # generate prompt.gen.ts and verify sha
 supabase functions deploy analyze-skin --use-api
 ```
 
-`ANTHROPIC_API_KEY`는 클라이언트에 두지 않고 `supabase secrets`로만 관리합니다.
+`ANTHROPIC_API_KEY` never lives in the client. It is managed only through `supabase secrets`.
 
-## 개발 과정에서 지킨 것들
+## Rules I kept during development
 
-- **주차별 게이트**: 실기기 E2E → 재현성 오차 ≤5 (실측 0 달성) → 페이월 → 출시. 게이트 통과 전 다음 주차 착수 금지
-- **셀프 감사**: 결제 우회 경로(딥링크 캡 우회 등)·보안·프라이버시를 항목별로 감사하고 `docs/audit-w3.md`에 P0/P1 우선순위로 기록
-- **과학적 근거 없는 기능은 만들지 않음**: 1일/1주 단위 판정은 요청이 있어도 영구 배제
+- **Weekly gates**: real-device E2E → reproducibility deviation ≤5 (measured 0) → paywall → launch. No moving to the next week before passing the gate
+- **Self audits**: payment bypass paths (deep-link cap bypass, etc.), security, and privacy audited item by item, recorded with P0/P1 priorities in `docs/audit-w3.md`
+- **No features without scientific grounding**: 1-day or 1-week verdicts are permanently excluded, no matter who asks
 
 ## License
 
