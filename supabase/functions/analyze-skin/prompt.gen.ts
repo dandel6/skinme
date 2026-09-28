@@ -1,4 +1,4 @@
-// AUTO-GENERATED — 직접 수정 금지.
+// AUTO-GENERATED - 직접 수정 금지.
 // 원본: prompts/skin-analysis-v0.10.md (source of truth)
 // source sha256(16): 5982428ca36a82cd
 // 갱신: npm run sync-prompt / 검증: npm run sync-prompt:check
