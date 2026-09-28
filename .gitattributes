@@ -1,0 +1,2 @@
+supabase/functions/analyze-skin/prompt.gen.ts text eol=lf
+prompts/*.md text eol=lf
